@@ -20,6 +20,30 @@ namespace IdentityServer
                             new Secret("secret".Sha256())
                         },
                         AllowedScopes = { "movieAPI" }
+                   },
+                   new Client
+                   {
+                       ClientId = "movies_mvc_client",
+                       ClientName = "Movie MVC Web App",
+                       AllowedGrantTypes = GrantTypes.Code,
+                       AllowRememberConsent = false,
+                       RedirectUris = new List<string>
+                       {
+                           "https://localhost:5002/signin-oidc"
+                       },
+                       PostLogoutRedirectUris = new List<string>
+                       {
+                           "https://localhost:5002/signout-callback-oidc"
+                       },
+                       ClientSecrets =
+                       {
+                           new Secret("secret".Sha256())
+                       },
+                       AllowedScopes = new List<string>
+                       {
+                           IdentityServerConstants.StandardScopes.OpenId,
+                           IdentityServerConstants.StandardScopes.Profile
+                       }
                    }
           };
 
@@ -32,7 +56,7 @@ namespace IdentityServer
         public static IEnumerable<ApiResource> ApiResources =>
           new ApiResource[]
           {
-               //new ApiResource("movieAPI", "Movie API")
+               new ApiResource("movieAPI", "Movie API")
           };
 
         public static IEnumerable<IdentityResource> IdentityResources =>
@@ -40,12 +64,6 @@ namespace IdentityServer
           {
               new IdentityResources.OpenId(),
               new IdentityResources.Profile(),
-              new IdentityResources.Address(),
-              new IdentityResources.Email(),
-              new IdentityResource(
-                    "roles",
-                    "Your role(s)",
-                    new List<string>() { "role" })
           };
 
         public static List<TestUser> TestUsers =>
