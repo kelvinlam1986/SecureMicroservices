@@ -6,6 +6,13 @@ namespace Movies.Client.ApiServices
 {
     public class MovieApiService : IMovieApiService
     {
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public MovieApiService(IHttpClientFactory httpClientFactory)
+        {
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        }
+
         public Task<Movie> CreateMovie(Movie movie)
         {
             throw new NotImplementedException();
@@ -23,31 +30,10 @@ namespace Movies.Client.ApiServices
 
         public async Task<IEnumerable<Movie>> GetMovies()
         {
-            var apiClientCredential = new ClientCredentialsTokenRequest
-            {
-                Address = "https://localhost:5005/connect/token",
-                ClientId = "movieClient",
-                ClientSecret = "secret",
-                Scope = "movieAPI"
-            };
+            var httpClient = _httpClientFactory.CreateClient("MovieApiClient");
+            var request = new HttpRequestMessage(HttpMethod.Get, "/api/movies");
 
-            var client = new HttpClient();
-
-            var disco = await client.GetDiscoveryDocumentAsync("https://localhost:5005");
-            if (disco.IsError)
-            {
-                return null;  // throw 500 error
-            }
-
-            var tokenResponse = await client.RequestClientCredentialsTokenAsync(apiClientCredential);
-            if (tokenResponse.IsError)
-            {
-                return null;
-            }
-
-            var apiClient = new HttpClient();
-            apiClient.SetBearerToken(tokenResponse.AccessToken);
-            var response = await apiClient.GetAsync("https://localhost:5001/api/movies");
+            var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
