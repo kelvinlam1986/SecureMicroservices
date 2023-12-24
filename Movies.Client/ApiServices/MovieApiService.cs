@@ -23,9 +23,17 @@ namespace Movies.Client.ApiServices
             throw new NotImplementedException();
         }
 
-        public Task<Movie> GetMovie(string id)
+        public async Task<Movie> GetMovie(string id)
         {
-            throw new NotImplementedException();
+            var httpClient = _httpClientFactory.CreateClient("MovieApiClient");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/api/movies/{id}");
+
+            var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var movie = JsonConvert.DeserializeObject<Movie>(content);
+            return movie;
         }
 
         public async Task<IEnumerable<Movie>> GetMovies()
