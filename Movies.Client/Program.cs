@@ -1,4 +1,6 @@
-﻿using IdentityModel.Client;
+﻿using IdentityModel;
+using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Net.Http.Headers;
@@ -22,11 +24,19 @@ builder.Services.AddAuthentication(options =>
     options.ClientId = "movies_mvc_client";
     options.ClientSecret = "secret";
     options.ResponseType = "code id_token";
-    options.Scope.Add("openid");
-    options.Scope.Add("profile");
+    // options.Scope.Add("openid");
+    // options.Scope.Add("profile");
+    options.Scope.Add("email");
     options.Scope.Add("movieAPI");
+    options.Scope.Add("roles");
     options.SaveTokens = true;
+    options.ClaimActions.MapUniqueJsonKey("role", "role");
     options.GetClaimsFromUserInfoEndpoint = true;
+    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        NameClaimType = JwtClaimTypes.GivenName,
+        RoleClaimType = JwtClaimTypes.Role,
+    };
 });
 
 builder.Services.AddTransient<AuthenticationDelegatingHandler>();
